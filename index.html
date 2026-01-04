@@ -312,14 +312,16 @@ document.addEventListener("keydown", e=>{
 });
 
 // LOGIN
-async function loginUser(username,password,role){
+async function loginUser(username,password){
   username=username.trim(); password=password.trim(); msg.textContent="";
-  const siteConfig = sessionStorage.getItem("siteConfig") ? JSON.parse(sessionStorage.getItem("siteConfig")) : null;
+const siteConfig = localStorage.getItem("siteConfig")
+  ? JSON.parse(localStorage.getItem("siteConfig"))
+  : null;
   if(!siteConfig){ msg.textContent="Lütfen QR kodu okutunuz!"; return; }
   if(!username||!password){ msg.textContent="Kullanıcı adı ve şifre gerekli!"; return; }
 
   try{
-    const siteId = sessionStorage.getItem("siteID");
+const siteId = localStorage.getItem("siteID");
     let app = getApps().find(a=>a.name==`siteApp-${siteId}`);
     if(!app) app=initializeApp(siteConfig,`siteApp-${siteId}`);
     const activeDB = getDatabase(app);
@@ -339,15 +341,20 @@ async function loginUser(username,password,role){
     if(user.password!==password){ msg.textContent="Şifre hatalı!"; return; }
 
     sessionStorage.setItem("currentUser", JSON.stringify({username:user.username,type:user.type}));
-    if(role==="security"){
-      if(secRemember.checked) localStorage.setItem("securityUser",JSON.stringify({username,password}));
-      else localStorage.removeItem("securityUser");
+if(secRemember.checked)
+  localStorage.setItem("securityUser", JSON.stringify({ username, password }));
+else
+  localStorage.removeItem("securityUser");
 
-      if(user.type==="company") window.location.href="sirket.html";
-      else if(user.type==="security") window.location.href="guvenlik.html";
-      else if(user.type==="admin") window.location.href="yetkili.html";
-      else msg.textContent="Yetki hatalı!";
-    }
+if(user.type === "company")
+  window.location.href = "sirket.html";
+else if(user.type === "security")
+  window.location.href = "guvenlik.html";
+else if(user.type === "admin")
+  window.location.href = "yetkili.html";
+else
+  msg.textContent = "Yetki hatalı!";
+
 
   }catch(err){ console.error(err); msg.textContent="Bağlantı hatası!"; }
 }
